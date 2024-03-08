@@ -1,6 +1,6 @@
 const { app } = require("@azure/functions");
 
-app.serviceBusQueue("queueHandler", {
+app.serviceBusQueue("queueTrigger", {
   connection: "servicebus",
   queueName: "dev-toc-middleware-sb-queue",
   handler: (message, context) => {

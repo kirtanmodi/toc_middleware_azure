@@ -21,10 +21,10 @@ app.http("httpTrigger", {
     context.log(`Received message: ${finalMessage}`);
 
     const sbClient = new ServiceBusClient(
-      process.env["devtocmiddlewaresbnamespace_SERVICEBUS"],
-      {
-        credential: new DefaultAzureCredential(),
-      }
+      "dev-toc-middleware-sb-namespace.servicebus.windows.net",
+      new DefaultAzureCredential({
+        managedIdentityClientId: "04988f23-9c1d-4c9d-9e01-004a1e761b2c",
+      })
     );
 
     const sender = sbClient.createSender("dev-toc-middleware-sb-queue");

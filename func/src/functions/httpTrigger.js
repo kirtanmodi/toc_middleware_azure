@@ -8,6 +8,15 @@ app.http("httpTrigger", {
   authLevel: "anonymous",
   handler: async (request, context) => {
     context.log(`Received message from httpTrigger`);
+    context.log(
+      `process.env["servicebus__fullyQualifiedNamespace"]: ${process.env["servicebus__fullyQualifiedNamespace"]}`
+    );
+    context.log(
+      `process.env["servicebus__clientID"]: ${process.env["servicebus__clientID"]}`
+    );
+    context.log(
+      `process.env["serviceBusQueueName"]: ${process.env["serviceBusQueueName"]}`
+    );
     const readStream = stream.Readable.from(request.body);
     let message = "";
     await new Promise((resolve, reject) => {
@@ -21,13 +30,13 @@ app.http("httpTrigger", {
     context.log(`Received message: ${finalMessage}`);
 
     const sbClient = new ServiceBusClient(
-      "dev-toc-middleware-sb-namespace.servicebus.windows.net",
+      process.env["servicebus__fullyQualifiedNamespace"],
       new DefaultAzureCredential({
-        managedIdentityClientId: "04988f23-9c1d-4c9d-9e01-004a1e761b2c",
+        managedIdentityClientId: process.env["servicebus__clientID"],
       })
     );
 
-    const sender = sbClient.createSender("dev-toc-middleware-sb-queue");
+    const sender = sbClient.createSender(process.env["serviceBusQueueName"]);
 
     try {
       await sender.sendMessages({

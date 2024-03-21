@@ -22,16 +22,18 @@ This command sets up necessary Azure resources in your account, including a func
 
 ### Function App Configuration
 
-After deployment, move to the `func` directory, which contains `host.json` and the function triggers. To configure the function for local testing, run:
-
-```
-func azure functionapp fetch-app-settings dev-toc-middleware-functions
-```
+After deployment, move to the `func` directory, which contains `host.json` and the function triggers. 
 
 To deploy the function to the Azure Function App:
 
 ```
 func azure functionapp publish dev-toc-middleware-functions
+```
+
+To configure the function for local testing, run:
+
+```
+func azure functionapp fetch-app-settings dev-toc-middleware-functions
 ```
 
 ### Local Testing

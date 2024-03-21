@@ -1,7 +1,7 @@
 param appPrefix string
 param location string
 
-param serviceBusNamespaceName string = '${appPrefix}-sb-namespace'
+param serviceBusNamespaceName string = '${appPrefix}-sb-ns'
 param serviceBusQueueName string = '${appPrefix}-sb-queue'
 
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2021-11-01' = {
@@ -47,5 +47,6 @@ resource queueRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01
 }
 
 output serviceBusNamespaceName string = serviceBusNamespace.name
+output serviceBusQueueName string = serviceBusQueue.name
 output serviceBusUserIdentityId string = userIdentity.id
 output serviceBusUserIdentityClientId string = userIdentity.properties.clientId

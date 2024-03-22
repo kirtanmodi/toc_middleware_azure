@@ -12,12 +12,8 @@ module servicebus 'modules/serviceBus.bicep' = {
 
 module cosmosDb 'modules/cosmodb.bicep' = {
   name: 'cosmosDb'
-  dependsOn: [
-    servicebus
-  ]
   params: {
     appPrefix: appPrefix
-    env: env
     location: location
   }
 }
@@ -26,6 +22,7 @@ module functionApp 'modules/functionApp.bicep' = {
   name: 'functionApp'
   dependsOn: [
     servicebus
+    cosmosDb
   ]
   params: {
     appPrefix: appPrefix
@@ -36,5 +33,10 @@ module functionApp 'modules/functionApp.bicep' = {
     serviceBusUserIdentityClientId: servicebus.outputs.serviceBusUserIdentityClientId
     serviceBusUserIdentityId: servicebus.outputs.serviceBusUserIdentityId
     env: env
+    cosmoAccountEndpoint: cosmosDb.outputs.cosmoAccountEndpoint
+    cosmoDatabaseName: cosmosDb.outputs.cosmoDatabaseName
+    cosmoContainerName: cosmosDb.outputs.cosmoContainerName
+    cosmodbManagedIdentityID: cosmosDb.outputs.cosmodbManagedIdentityID
+    cosmodbManagedIdentityClientId: cosmosDb.outputs.cosmodbManagedIdentityClientId
   }
 }

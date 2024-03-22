@@ -2,7 +2,7 @@ targetScope = 'subscription'
 
 param env string = 'dev'
 
-param appPrefix string = '${env}-toc-middleware'
+param appPrefix string = '${env}-toc-middle'
 param location string = 'eastus'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {

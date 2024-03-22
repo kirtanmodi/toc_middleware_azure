@@ -7,6 +7,12 @@ param serviceBusQueueName string
 param serviceBusUserIdentityId string
 param serviceBusUserIdentityClientId string
 
+param cosmoAccountEndpoint string
+param cosmoDatabaseName string
+param cosmoContainerName string
+param cosmodbManagedIdentityID string
+param cosmodbManagedIdentityClientId string
+
 @allowed([
   'Standard_LRS'
   'Standard_GRS'
@@ -77,6 +83,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     type: 'SystemAssigned, UserAssigned'
     userAssignedIdentities: {
       '${serviceBusUserIdentityId}': {}
+      '${cosmodbManagedIdentityID}': {}
     }
   }
   properties: {
@@ -130,6 +137,26 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'serviceBusQueueName'
           value: serviceBusQueueName
+        }
+        {
+          name: 'cosmosdb__endpoint'
+          value: cosmoAccountEndpoint
+        }
+        {
+          name: 'cosmosdb__credential'
+          value: 'managedidentity'
+        }
+        {
+          name: 'cosmosdb__database'
+          value: cosmoDatabaseName
+        }
+        {
+          name: 'cosmosdb__container'
+          value: cosmoContainerName
+        }
+        {
+          name: 'cosmosdb__clientID'
+          value: cosmodbManagedIdentityClientId
         }
       ]
       ftpsState: 'FtpsOnly'

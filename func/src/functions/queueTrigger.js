@@ -32,9 +32,10 @@ const updateDatabase = async (message, context) => {
   try {
     const messageData =
       typeof message === "string" ? JSON.parse(message) : message;
+
     const itemToUpsert = {
-      id: uuidv4(),
-      ...messageData.data,
+      orderId: messageData.data?.id,
+      ProcessedAt: new Date().getTime(),
     };
 
     const { resource: upsertedItem } = await container.items.upsert(

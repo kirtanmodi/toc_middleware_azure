@@ -1,17 +1,38 @@
 param appPrefix string
-param env string
 param location string
 
-param accountName string = '${env}${appPrefix}cosmosdbaccount'
+param accountName string = '${appPrefix}cosmosdbaccount'
+param databaseName string = '${appPrefix}cosmosdbdatabase'
+param containerName string = '${appPrefix}cosmosdbcontainer'
 
-@description('The name for the SQL API database')
-param databaseName string = '${env}${appPrefix}cosmosdbdatabase'
+@description('Friendly name for the SQL Role Definition')
+param roleDefinitionName string = 'My Read Write Role'
 
-@description('The name for the SQL API container')
-param containerName string = '${env}${appPrefix}cosmosdbcontainer'
+@description('Data actions permitted by the Role Definition')
+param dataActions array = [
+  'Microsoft.DocumentDB/databaseAccounts/readMetadata'
+  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*'
+]
 
-resource account 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
-  name: toLower(accountName)
+resource cosmoUserIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+  name: '${appPrefix}UserIdentity'
+  location: location
+}
+
+var principalId = cosmoUserIdentity.properties.principalId
+
+var locations = [
+  {
+    locationName: location
+    failoverPriority: 0
+    isZoneRedundant: false
+  }
+]
+var roleDefinitionIdStatic = guid('sql-role-definition-', appPrefix, location)
+var roleAssignmentIdStatic = guid('sql-role-assignment-', appPrefix, location)
+
+resource databaseAccount 'Microsoft.DocumentDB/databaseAccounts@2021-04-15' = {
+  name: accountName
   location: location
   properties: {
     enableFreeTier: true
@@ -19,16 +40,12 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
     }
-    locations: [
-      {
-        locationName: location
-      }
-    ]
+    locations: locations
   }
 }
 
 resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-11-15' = {
-  parent: account
+  parent: databaseAccount
   name: databaseName
   properties: {
     resource: {
@@ -45,7 +62,7 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
       id: containerName
       partitionKey: {
         paths: [
-          '/orderId '
+          '/orderId'
         ]
         kind: 'Hash'
       }
@@ -66,7 +83,129 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   }
 }
 
-output location string = location
-output name string = container.name
-output resourceGroupName string = resourceGroup().name
-output resourceId string = container.id
+resource sqlRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2021-04-15' = {
+  name: '${databaseAccount.name}/${roleDefinitionIdStatic}'
+  properties: {
+    roleName: roleDefinitionName
+    type: 'CustomRole'
+    assignableScopes: [
+      databaseAccount.id
+    ]
+    permissions: [
+      {
+        dataActions: dataActions
+      }
+    ]
+  }
+}
+
+resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-04-15' = {
+  name: '${databaseAccount.name}/${roleAssignmentIdStatic}'
+  properties: {
+    roleDefinitionId: sqlRoleDefinition.id
+    principalId: principalId
+    scope: databaseAccount.id
+  }
+}
+
+output cosmoAccountEndpoint string = databaseAccount.properties.documentEndpoint
+output cosmoDatabaseName string = database.name
+output cosmoContainerName string = container.name
+output cosmodbManagedIdentityID string = cosmoUserIdentity.id
+output cosmodbManagedIdentityClientId string = cosmoUserIdentity.properties.clientId
+
+// param dataActions array = [
+//   'Microsoft.DocumentDB/databaseAccounts/readMetadata'
+//   'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*'
+// ]
+
+// resource account 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
+//   name: toLower(accountName)
+//   location: location
+//   properties: {
+//     enableFreeTier: true
+//     databaseAccountOfferType: 'Standard'
+//     consistencyPolicy: {
+//       defaultConsistencyLevel: 'Session'
+//     }
+//     locations: [
+//       {
+//         locationName: location
+//       }
+//     ]
+//   }
+// }
+
+// resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-11-15' = {
+//   parent: account
+//   name: databaseName
+//   properties: {
+//     resource: {
+//       id: databaseName
+//     }
+//   }
+// }
+
+// resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+//   parent: database
+//   name: containerName
+//   properties: {
+//     resource: {
+//       id: containerName
+//       partitionKey: {
+//         paths: [
+//           '/orderId'
+//         ]
+//         kind: 'Hash'
+//       }
+//       indexingPolicy: {
+//         indexingMode: 'consistent'
+//         includedPaths: [
+//           {
+//             path: '/*'
+//           }
+//         ]
+//         excludedPaths: [
+//           {
+//             path: '/_etag/?'
+//           }
+//         ]
+//       }
+//     }
+//   }
+// }
+
+// resource userIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
+//   name: '${appPrefix}${env}UserIdentity'
+//   location: location
+// }
+
+// var userIdentityPrincipalId = userIdentity.properties.principalId
+
+// var roleDefinitionId = guid('sql-role-definition-', userIdentityPrincipalId, account.id)
+// var roleAssignmentId = guid(roleDefinitionId, userIdentityPrincipalId, account.id)
+
+// resource sqlRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2021-04-15' = {
+//   name: '${account.name}/${roleDefinitionId}'
+//   properties: {
+//     roleName: roleDefinitionName
+//     type: 'CustomRole'
+//     assignableScopes: [
+//       databaseAccount.id
+//     ]
+//     permissions: [
+//       {
+//         dataActions: dataActions
+//       }
+//     ]
+//   }
+// }
+
+// resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-04-15' = {
+//   name: '${databaseAccount.name}/${roleAssignmentId}'
+//   properties: {
+//     roleDefinitionId: sqlRoleDefinition.id
+//     principalId: principalId
+//     scope: databaseAccount.id
+//   }
+// }

@@ -8,15 +8,6 @@ app.http("httpTrigger", {
   authLevel: "anonymous",
   handler: async (request, context) => {
     context.log(`Received message from httpTrigger`);
-    context.log(
-      `process.env["servicebus__fullyQualifiedNamespace"]: ${process.env["servicebus__fullyQualifiedNamespace"]}`
-    );
-    context.log(
-      `process.env["servicebus__clientID"]: ${process.env["servicebus__clientID"]}`
-    );
-    context.log(
-      `process.env["serviceBusQueueName"]: ${process.env["serviceBusQueueName"]}`
-    );
     const readStream = stream.Readable.from(request.body);
     let message = "";
     await new Promise((resolve, reject) => {

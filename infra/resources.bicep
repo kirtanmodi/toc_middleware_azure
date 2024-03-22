@@ -20,6 +20,7 @@ module functionApp 'modules/functionApp.bicep' = {
     location: location
     appInsightsLocation: location
     serviceBusNamespaceName: servicebus.outputs.serviceBusNamespaceName
+    serviceBusQueueName: servicebus.outputs.serviceBusQueueName
     serviceBusUserIdentityClientId: servicebus.outputs.serviceBusUserIdentityClientId
     serviceBusUserIdentityId: servicebus.outputs.serviceBusUserIdentityId
     env: env

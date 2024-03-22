@@ -3,6 +3,7 @@ param appName string = '${appPrefix}-functions'
 param env string
 
 param serviceBusNamespaceName string
+param serviceBusQueueName string
 param serviceBusUserIdentityId string
 param serviceBusUserIdentityClientId string
 
@@ -133,6 +134,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'servicebus__clientID'
           value: serviceBusUserIdentityClientId
+        }
+        {
+          name: 'servicebus__queueName'
+          value: serviceBusQueueName
         }
       ]
       ftpsState: 'FtpsOnly'

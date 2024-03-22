@@ -47,5 +47,6 @@ resource queueRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01
 }
 
 output serviceBusNamespaceName string = serviceBusNamespace.name
+output serviceBusQueueName string = serviceBusQueue.name
 output serviceBusUserIdentityId string = userIdentity.id
 output serviceBusUserIdentityClientId string = userIdentity.properties.clientId

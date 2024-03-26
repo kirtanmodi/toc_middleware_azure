@@ -12,6 +12,7 @@ param roleDefinitionName string = 'My Read Write Role'
 param dataActions array = [
   'Microsoft.DocumentDB/databaseAccounts/readMetadata'
   'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*'
+  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*'
 ]
 
 resource cosmoUserIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
@@ -113,99 +114,3 @@ output cosmoDatabaseName string = database.name
 output cosmoContainerName string = container.name
 output cosmodbManagedIdentityID string = cosmoUserIdentity.id
 output cosmodbManagedIdentityClientId string = cosmoUserIdentity.properties.clientId
-
-// param dataActions array = [
-//   'Microsoft.DocumentDB/databaseAccounts/readMetadata'
-//   'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*'
-// ]
-
-// resource account 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
-//   name: toLower(accountName)
-//   location: location
-//   properties: {
-//     enableFreeTier: true
-//     databaseAccountOfferType: 'Standard'
-//     consistencyPolicy: {
-//       defaultConsistencyLevel: 'Session'
-//     }
-//     locations: [
-//       {
-//         locationName: location
-//       }
-//     ]
-//   }
-// }
-
-// resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-11-15' = {
-//   parent: account
-//   name: databaseName
-//   properties: {
-//     resource: {
-//       id: databaseName
-//     }
-//   }
-// }
-
-// resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
-//   parent: database
-//   name: containerName
-//   properties: {
-//     resource: {
-//       id: containerName
-//       partitionKey: {
-//         paths: [
-//           '/orderId'
-//         ]
-//         kind: 'Hash'
-//       }
-//       indexingPolicy: {
-//         indexingMode: 'consistent'
-//         includedPaths: [
-//           {
-//             path: '/*'
-//           }
-//         ]
-//         excludedPaths: [
-//           {
-//             path: '/_etag/?'
-//           }
-//         ]
-//       }
-//     }
-//   }
-// }
-
-// resource userIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
-//   name: '${appPrefix}${env}UserIdentity'
-//   location: location
-// }
-
-// var userIdentityPrincipalId = userIdentity.properties.principalId
-
-// var roleDefinitionId = guid('sql-role-definition-', userIdentityPrincipalId, account.id)
-// var roleAssignmentId = guid(roleDefinitionId, userIdentityPrincipalId, account.id)
-
-// resource sqlRoleDefinition 'Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions@2021-04-15' = {
-//   name: '${account.name}/${roleDefinitionId}'
-//   properties: {
-//     roleName: roleDefinitionName
-//     type: 'CustomRole'
-//     assignableScopes: [
-//       databaseAccount.id
-//     ]
-//     permissions: [
-//       {
-//         dataActions: dataActions
-//       }
-//     ]
-//   }
-// }
-
-// resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-04-15' = {
-//   name: '${databaseAccount.name}/${roleAssignmentId}'
-//   properties: {
-//     roleDefinitionId: sqlRoleDefinition.id
-//     principalId: principalId
-//     scope: databaseAccount.id
-//   }
-// }

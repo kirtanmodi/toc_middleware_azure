@@ -33,6 +33,26 @@ const updateDatabase = async (message, context) => {
     const messageData =
       typeof message === "string" ? JSON.parse(message) : message;
 
+    const orderId = messageData.data?.id;
+
+    if (!orderId) {
+      throw new Error("Order ID is missing in the message data");
+    }
+
+    context.log("Order ID:", orderId);
+
+    const { resources: items } = await container.items
+      .query({
+        query: "SELECT * FROM c WHERE c.orderId = @orderId",
+        parameters: [{ name: "@orderId", value: orderId }],
+      })
+      .fetchAll();
+
+    if (items.length > 0) {
+      context.log("Item already exists in the database:", items[0].id);
+      return;
+    }
+
     const itemToUpsert = {
       orderId: messageData.data?.id,
       ProcessedAt: new Date().getTime(),

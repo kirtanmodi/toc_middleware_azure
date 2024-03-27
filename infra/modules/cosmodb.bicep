@@ -15,8 +15,8 @@ param dataActions array = [
   'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*'
 ]
 
-resource cosmoUserIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2022-01-31-preview' = {
-  name: '${appPrefix}UserIdentity'
+resource cosmoUserIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${appPrefix}-cosmo-UserIdentity'
   location: location
 }
 

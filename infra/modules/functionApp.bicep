@@ -75,6 +75,16 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   properties: {}
 }
 
+resource sqlServer 'Microsoft.Sql/servers@2020-11-01-preview' existing = {
+  name: 'sqlservertesttoc' //change to the name of the existing SQL Server
+  scope: resourceGroup('test')
+}
+
+resource sqlDatabase 'Microsoft.Sql/servers/databases@2020-11-01-preview' existing = {
+  parent: sqlServer
+  name: 'sqldb' //change to the name of the existing SQL Database
+}
+
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   location: location
@@ -157,6 +167,14 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'cosmosdb__clientID'
           value: cosmodbManagedIdentityClientId
+        }
+        {
+          name: 'SQLServerName'
+          value: sqlServer.properties.fullyQualifiedDomainName
+        }
+        {
+          name: 'SQLDatabaseName'
+          value: sqlDatabase.name
         }
       ]
       ftpsState: 'FtpsOnly'

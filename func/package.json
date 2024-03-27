@@ -12,6 +12,7 @@
     "@azure/identity": "^4.0.1",
     "@azure/service-bus": "^7.9.4",
     "stream": "^0.0.2",
+    "tedious": "^18.1.0",
     "uuid": "^9.0.1"
   },
   "main": "src/functions/*.js"
